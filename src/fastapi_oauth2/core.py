@@ -23,6 +23,8 @@ from .client import OAuth2Client
 from .exceptions import OAuth2AuthenticationError
 from .exceptions import OAuth2InvalidRequestError
 
+import logging
+logger = logging.getLogger(__name__)
 
 class OAuth2Strategy(BaseStrategy):
     """Dummy strategy for using the `BaseOAuth2.user_data` method."""
@@ -102,6 +104,7 @@ class OAuth2Core:
         if not request.query_params.get("state"):
             raise OAuth2InvalidRequestError(400, "'state' parameter was not found in callback request")
         if request.query_params.get("state") != self._state:
+            logger.error(F"request.query_params.get('state') [{request.query_params.get('state')}] != self._state [{self._state}]")
             raise OAuth2InvalidRequestError(400, "'state' parameter does not match")
 
         redirect_uri = self.get_redirect_uri(request)
@@ -136,6 +139,7 @@ class OAuth2Core:
                 raise OAuth2AuthenticationError(401, str(e))
 
     async def token_redirect(self, request: Request, **kwargs) -> RedirectResponse:
+        logger.warning(F"going to call self.token_data. self._state: {self._state}")
         access_token = request.auth.jwt_create(await self.token_data(request, **kwargs))
         response = RedirectResponse(self.redirect_uri or request.base_url)
         response.set_cookie(
