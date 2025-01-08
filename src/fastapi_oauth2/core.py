@@ -139,7 +139,7 @@ class OAuth2Core:
                 raise OAuth2AuthenticationError(401, str(e))
 
     async def token_redirect(self, request: Request, **kwargs) -> RedirectResponse:
-        logger.warning(F"going to call self.token_data. self._state: {self._state}")
+        logger.debug(F"going to call self.token_data. self._state: {self._state}")
         access_token = request.auth.jwt_create(await self.token_data(request, **kwargs))
         response = RedirectResponse(self.redirect_uri or request.base_url)
         response.set_cookie(
